@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101f2c">
+  <title>独鲸 · 剪影版</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; background: #101f2c; }
+    svg { display: block; width: min(100%, 280vh); width: min(100%, 280svh); height: auto; overflow: hidden; }
+    #belly { opacity: 0; transition: opacity .3s ease; }
+    #whale.show-belly #belly { opacity: 1; }
+    #belly-toggle {
+      position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom));
+      display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 6px;
+      background: #101f2ce6; color: #c2d4d8; font: 14px/1.3 system-ui, sans-serif; cursor: pointer;
+    }
+    #belly-toggle:focus-visible { outline: 2px solid #d8e6e6; outline-offset: 3px; }
+    .track { width: 28px; height: 16px; padding: 2px; border: 1px solid #869da6; border-radius: 10px; }
+    .track::after { content: ''; display: block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; transition: transform .2s ease; }
+    #belly-toggle[aria-checked="true"] .track { background: #adc1c6; color: #183447; }
+    #belly-toggle[aria-checked="true"] .track::after { transform: translateX(12px); }
+    @media (prefers-reduced-motion: reduce) {
+      #belly, .track::after { transition: none; }
+      #bubbles, #sonar { display: none; }
+    }
+  </style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 500" role="img" aria-labelledby="title description">
+  <title id="title">独鲸 · 剪影版</title>
+  <desc id="description">雾蓝色的海谷里，一头深蓝色的鲸在画面中央缓缓划尾，海床和斜光向左退去。偶尔有几颗气泡从鲸背浮起，两道声呐波纹从鲸头向前扩散。</desc>
+  <defs>
+    <clipPath id="body-clip"><use href="#silhouette"/></clipPath>
+    <path id="air-bubble" fill="#84a2ae" d="M-1 .06C-1.04-.42-.63-.79-.12-.83.42-.9.99-.59 1.02-.08 1.08.38.7.73.13.78-.48.84-.96.57-1 .06Z"/>
+    <linearGradient id="echo-ink" x2="0" y2="1">
+      <stop stop-color="#b6d5db" stop-opacity="0"/><stop offset=".5" stop-color="#c3dfdf"/><stop offset="1" stop-color="#b6d5db" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="water" x2=".17" y2="1">
+      <stop stop-color="#84a2ae"/><stop offset=".34" stop-color="#52798d"/><stop offset=".72" stop-color="#37566f"/><stop offset="1" stop-color="#243c53"/>
+    </linearGradient>
+    <linearGradient id="shaft" x2="0" y2="1">
+      <stop stop-color="#edf5e5" stop-opacity=".42"/><stop offset=".55" stop-color="#b9d6db" stop-opacity=".15"/><stop offset="1" stop-color="#b9d6db" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="silt" x2="0" y2="1">
+      <stop stop-color="#637f89"/><stop offset="1" stop-color="#3d5a6c"/>
+    </linearGradient>
+    <linearGradient id="basalt" x2=".35" y2="1">
+      <stop stop-color="#345570"/><stop offset="1" stop-color="#203e5b"/>
+    </linearGradient>
+    <filter id="soft" x="-15%" y="-10%" width="130%" height="120%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".76" numOctaves="3" stitchTiles="stitch"/></filter>
+    <pattern id="grain" width="128" height="128" patternUnits="userSpaceOnUse"><path d="M0 0h128v128H0z" filter="url(#paper)"/></pattern>
+    <pattern id="rays" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <g fill="url(#shaft)">
+        <path opacity=".58" filter="url(#soft)" d="M318 -30h168L163 375H37z M1070 -30h123L921 324h-96z"/>
+        <path opacity=".34" d="M506 -30h35L251 357h-53z M1238 -30h75l-288 415H920z"/>
+      </g>
+    </pattern>
+    <pattern id="far-ridge" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <path fill="#45667a" d="M0 286C112 286 138 222 245 227S409 302 560 312 754 276 891 269 1073 225 1152 228 1304 286 1400 286V500H0Z"/>
+    </pattern>
+    <pattern id="near-ridge" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <path fill="#35576c" d="M0 322C105 322 140 278 228 282S401 360 557 365 792 339 887 322 1029 268 1143 273 1303 322 1400 322V500H0Z"/>
+      <path fill="#304f64" d="M0 349C132 349 133 322 229 326S421 384 577 378 829 347 933 331 1100 297 1177 307 1325 349 1400 349V500H0Z"/>
+    </pattern>
+    <pattern id="shelf" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <path fill="url(#silt)" d="M0 391C113 391 169 374 293 377S561 420 723 413 992 374 1135 376 1330 391 1400 391V500H0Z"/>
+      <path fill="#8ba2a4" opacity=".28" d="M163 391q119-10 212-2-129-3-212 2z M833 416q116-19 241-24-135 10-241 24z"/>
+      <g fill="url(#basalt)">
+        <path d="M47 391l20-7 9-21q7-14 15-14 15 7 29 32l25 4 9 5q-54 5-107 1z"/>
+        <path d="M390 393l10-5 7-7 7-1 13 11 11 3z M1138 383l16-5 12-13 12-4 11 5 7 12 25 7z"/>
+      </g>
+      <path fill="#728a95" opacity=".43" d="M70 379q10-30 21-30l9 10-11-4z M1154 378l12-13 12-4 6 4-10-1z"/>
+    </pattern>
+    <pattern id="foreground" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <path fill="#27455c" d="M0 414C144 414 194 400 320 405S586 441 741 437 939 417 1086 409 1301 414 1400 414V500H0Z"/>
+      <path fill="#223e54" d="M0 449C108 449 166 430 297 434S589 469 744 463 1007 428 1138 434 1311 449 1400 449V500H0Z"/>
+      <path fill="#1e394e" d="M275 441l23-5 8-7 13 1 11 9 18 3z M994 444l19-6 9-12 12-3 16 12 29 6z"/>
+    </pattern>
+  </defs>
+  <path fill="url(#water)" d="M0 0h1400v500H0z"/>
+  <rect width="2800" height="500" fill="url(#rays)" data-speed="7"/>
+  <rect width="2800" height="500" fill="url(#far-ridge)" data-speed="2.8"/>
+  <rect width="2800" height="500" fill="url(#near-ridge)" data-speed="6"/>
+  <rect width="2800" height="500" fill="url(#shelf)" data-speed="12"/>
+  <rect width="2800" height="500" fill="url(#foreground)" data-speed="20"/>
+  <g id="whale" fill="#183447">
+    <g id="bubbles" transform="translate(53 -34)" aria-hidden="true">
+      <use href="#air-bubble"/><use href="#air-bubble"/><use href="#air-bubble"/>
+    </g>
+    <g id="sonar" transform="translate(107 -6)" fill="none" stroke="url(#echo-ink)" stroke-width="1.6" aria-hidden="true">
+      <path/><path/>
+    </g>
+    <path d="M68 51C61 61 57 73 40 79 34 82 24 81 23 78 34 72 32 57 39 50Z"/>
+    <path id="silhouette"/>
+    <path id="belly" clip-path="url(#body-clip)" fill="#607d89" d="M119-5C102 13 79 31 49 39S-3 44-35 31Q-51 25-68 18V82H119Z"/>
+    <path id="flipper" d="M8 31C-1 35-10 49-23 57-32 62-43 63-49 62-48 70-29 76-12 71 5 67 15 54 21 44 23 37 19 31 8 31Z"/>
+  </g>
+  <g id="plankton" fill="#e1ece1"></g>
+  <path fill="url(#grain)" opacity=".044" pointer-events="none" d="M0 0h1400v500H0z"/>
+</svg>
+<button id="belly-toggle" type="button" role="switch" aria-checked="false" aria-controls="belly"><span class="track" aria-hidden="true"></span>鲸腹</button>
+<script>
+  'use strict';
+  const whale = document.querySelector('#whale');
+  const silhouette = document.querySelector('#silhouette');
+  const flipper = document.querySelector('#flipper');
+  const bellyToggle = document.querySelector('#belly-toggle');
+  bellyToggle.addEventListener('click', () => {
+    const visible = whale.classList.toggle('show-belly');
+    bellyToggle.setAttribute('aria-checked', String(visible));
+  });
+  const layers = Array.from(document.querySelectorAll('[data-speed]'), node => ({ node, speed: Number(node.dataset.speed) }));
+  const sceneWidth = 1400;
+  function beat(phase) {
+    const stroke = ((phase + 1) % 1) / .52;
+    return stroke < 1 ? Math.sin(2 * Math.PI * stroke) * Math.sin(Math.PI * stroke) ** 2 : 0;
+  }
+
+  function pose(time) {
+    const cycle = time / 9.8 + .35;
+    const hip = 3 * beat(cycle);
+    const tail = 12 * beat(cycle - .055);
+    const tip = 16 * beat(cycle - .09);
+    silhouette.setAttribute('d', `M-117 ${tail+3}
+      C-88 ${tail+4} -74 ${hip-4} -49 ${hip-12} C-19-21 20-35 55-36 C83-38 99-33 108-17
+      C122 7 113 36 95 50 C70 69 33 70 0 57 C-34 44 -53 ${hip+23} -79 ${hip+16}
+      C-94 ${tail+12} -105 ${tail+12} -117 ${tail+12}
+      C-130 ${tail+17} -145 ${tip+17} -162 ${tip+6} Q-165 ${tip+3} -161 ${tip+3}
+      C-149 ${tip+4} -141 ${tail+1} -133 ${tail+1}
+      C-143 ${tip-4} -148 ${tip-12} -149 ${tip-22} Q-150 ${tip-25} -146 ${tip-23}
+      C-135 ${tip-16} -123 ${tail-11} -120 ${tail-1} Q-119 ${tail+2} -117 ${tail+3}Z`);
+    flipper.setAttribute('transform', `rotate(${4 * Math.sin(cycle * 2 * Math.PI - .6)} 11 36)`);
+    const x = 700 + 2 * Math.sin(cycle * 2 * Math.PI);
+    const y = 246 + 3.4 * Math.sin(time / 4.5);
+    whale.setAttribute('transform', `translate(${x} ${y}) rotate(${.6 + hip * .15}) scale(.94) translate(25 -20)`);
+  }
+
+  let seed = 52;
+  function random() {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  }
+  const plankton = document.querySelector('#plankton');
+  const flecks = Array.from({ length: 42 }, () => {
+    const x = random() * sceneWidth, y = random() * 500, depth = random();
+    const node = document.createElementNS(whale.namespaceURI, 'ellipse');
+    node.setAttribute('rx', .4 + depth);
+    node.setAttribute('ry', .3 + depth * .55);
+    node.setAttribute('opacity', .08 + depth * .19);
+    plankton.append(node);
+    return { node, x, y, depth };
+  });
+  const bubbles = Array.from(document.querySelector('#bubbles').children);
+  const echoes = Array.from(document.querySelector('#sonar').children);
+  function burst(nodes, age, spacing, lifetime, draw) {
+    nodes.forEach((node, index) => {
+      const progress = (age - index * spacing) / lifetime;
+      if (progress <= 0 || progress >= 1) {
+        if (!node.hasAttribute('display')) node.setAttribute('display', 'none');
+        return;
+      }
+      node.removeAttribute('display');
+      draw(node, progress, index);
+    });
+  }
+  function drawBubble(node, progress, index) {
+    const drift = -(34 + 5 * index) * progress + 7 * Math.sin(progress * 5 + index * 2) * progress;
+    const rise = -(72 + index * 9) * progress;
+    const size = (5.1 - index * 1.15) * (.75 + progress * .35);
+    node.setAttribute('transform', `translate(${drift} ${rise}) rotate(${10 * Math.sin(progress * 5 + index)}) scale(${size})`);
+    node.setAttribute('opacity', .62 * Math.sin(Math.PI * progress));
+  }
+  function drawEcho(node, progress, index) {
+    const radius = 15 + progress * 176;
+    const edge = radius * .78, spread = radius * .626;
+    node.setAttribute('d', `M${edge} ${-spread}A${radius} ${radius} 0 0 1 ${edge} ${spread}`);
+    node.setAttribute('opacity', (.76 - index * .24) * Math.min(progress * 8, 1) * (1 - progress));
+  }
+  function render(time) {
+    pose(time);
+    const passage = Math.floor(time / 26), local = time % 26;
+    burst(bubbles, local - 2 - (passage % 3) * 1.4, .56, 3.8, drawBubble);
+    burst(echoes, local - 11 - (passage % 4) * 1.2, .72, 3.2, drawEcho);
+    for (const { node, speed } of layers) {
+      node.setAttribute('transform', `translate(${-(time * speed % sceneWidth)} 0)`);
+    }
+    for (const { node, x, y, depth } of flecks) {
+      node.setAttribute('cx', 1402 - ((x + time * (3 + depth * 12)) % 1404));
+      node.setAttribute('cy', y + 2.5 * Math.sin(time / 8 + x));
+    }
+  }
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let frame, previous, elapsed = 0;
+  function tick(now) {
+    if (previous !== undefined) elapsed += Math.min(now - previous, 100) / 1000;
+    previous = now;
+    render(elapsed);
+    frame = requestAnimationFrame(tick);
+  }
+  function syncPlayback() {
+    cancelAnimationFrame(frame);
+    previous = undefined;
+    render(elapsed);
+    if (!document.hidden && !reduced.matches) frame = requestAnimationFrame(tick);
+  }
+  reduced.addEventListener('change', syncPlayback);
+  document.addEventListener('visibilitychange', syncPlayback);
+  syncPlayback();
+</script>
+</body>
+</html>

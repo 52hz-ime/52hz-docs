@@ -1,0 +1,11 @@
+.whale-divider {
+  width: 100%;
+  max-width: 28rem;
+  height: 2rem;
+  margin: 2rem auto;
+  border: 0;
+  background:
+    url("./whale-mark.svg") center / 3.5rem auto no-repeat,
+    linear-gradient(to right, transparent, #607d8980) left center / calc(50% - 2.5rem) 1px no-repeat,
+    linear-gradient(to left, transparent, #607d8980) right center / calc(50% - 2.5rem) 1px no-repeat;
+}
