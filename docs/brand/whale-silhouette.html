@@ -13,6 +13,9 @@
     #camera { transform-origin: 700px 250px; }
     [data-plane] { transform-origin: 700px 400px; }
     #belly { opacity: 0; transition: opacity .3s ease; }
+    #distance-haze { opacity: 0; transition: opacity .22s ease-out; }
+    [data-deep-color] { transition: stop-color .22s ease-out; }
+    #fine-rays { transition: filter .22s ease-out; }
     #whale.show-belly #belly { opacity: 1; }
     .controls {
       position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom));
@@ -31,7 +34,7 @@
     #belly-toggle[aria-checked="true"] .track { background: #adc1c6; color: #183447; }
     #belly-toggle[aria-checked="true"] .track::after { transform: translateX(12px); }
     @media (prefers-reduced-motion: reduce) {
-      #camera, [data-plane], #belly, .track::after { transition: none; }
+      #camera, [data-plane], #distance-haze, [data-deep-color], #fine-rays, #belly, .track::after { transition: none; }
       #bubbles, #sonar { display: none; }
     }
   </style>
@@ -47,13 +50,22 @@
       <stop stop-color="#b6d5db" stop-opacity="0"/><stop offset=".5" stop-color="#c3dfdf"/><stop offset="1" stop-color="#b6d5db" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="water" x2=".17" y2="1">
-      <stop stop-color="#84a2ae"/><stop offset=".34" stop-color="#52798d"/><stop offset=".8" stop-color="#34566c"/><stop offset="1" stop-color="#243c53"/>
+      <stop stop-color="#84a2ae" data-deep-color="#779ba9"/><stop offset=".34" stop-color="#52798d" data-deep-color="#416e87"/><stop offset=".8" stop-color="#34566c" data-deep-color="#284e69"/><stop offset="1" stop-color="#243c53" data-deep-color="#203a53"/>
     </linearGradient>
     <linearGradient id="shaft" x2="0" y2="1">
-      <stop stop-color="#edf5e5" stop-opacity=".42"/><stop offset=".55" stop-color="#b9d6db" stop-opacity=".15"/><stop offset="1" stop-color="#b9d6db" stop-opacity="0"/>
+      <stop stop-color="#edf5e5" stop-opacity=".54"/><stop offset=".32" stop-color="#c6dfe0" stop-opacity=".26"/>
+      <stop offset=".69" stop-color="#aac7d1" stop-opacity=".075"/><stop offset="1" stop-color="#aac7d1" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="ambient-depth" x2="0" y2="1">
+      <stop stop-color="#658797" stop-opacity=".26"/><stop offset=".32" stop-color="#527688" stop-opacity=".6"/>
+      <stop offset=".64" stop-color="#3b5c72" stop-opacity=".76"/><stop offset="1" stop-color="#273f54" stop-opacity=".48"/>
+    </linearGradient>
+    <linearGradient id="surface-focus" gradientUnits="userSpaceOnUse" x2="350" spreadMethod="repeat" gradientTransform="matrix(1 0 -.7 1 0 0)"/>
+    <mask id="refracted-light" maskUnits="userSpaceOnUse" x="0" y="0" width="1400" height="500">
+      <rect width="1400" height="500" fill="url(#surface-focus)"/>
+    </mask>
     <linearGradient id="silt" x2="0" y2="1">
-      <stop stop-color="#637f89"/><stop offset="1" stop-color="#3d5a6c"/>
+      <stop stop-color="#637f89" data-deep-color="#567584"/><stop offset="1" stop-color="#3d5a6c" data-deep-color="#38576e"/>
     </linearGradient>
     <linearGradient id="basalt" x2=".35" y2="1">
       <stop stop-color="#345570"/><stop offset="1" stop-color="#203e5b"/>
@@ -62,10 +74,10 @@
     <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".76" numOctaves="3" stitchTiles="stitch"/></filter>
     <pattern id="grain" width="128" height="128" patternUnits="userSpaceOnUse"><path d="M0 0h128v128H0z" filter="url(#paper)"/></pattern>
     <pattern id="rays" width="1400" height="500" patternUnits="userSpaceOnUse">
-      <g fill="url(#shaft)">
-        <path opacity=".58" filter="url(#soft)" d="M318 -30h168L163 375H37z M1070 -30h123L921 324h-96z"/>
-        <path opacity=".34" d="M506 -30h35L251 357h-53z M1238 -30h75l-288 415H920z"/>
-      </g>
+      <path fill="url(#shaft)" opacity=".58" filter="url(#soft)" d="M318 -30h168L163 375H37z M1070 -30h123L921 324h-96z"/>
+    </pattern>
+    <pattern id="ray-edges" width="1400" height="500" patternUnits="userSpaceOnUse">
+      <path fill="url(#shaft)" opacity=".34" d="M506 -30h35L251 357h-53z M1238 -30h75l-288 415H920z"/>
     </pattern>
     <pattern id="far-ridge" width="1400" height="500" patternUnits="userSpaceOnUse">
       <path fill="#45667a" d="M0 286C112 286 138 222 245 227S409 302 560 312 754 276 891 269 1073 225 1152 228 1304 286 1400 286V500H0Z"/>
@@ -92,13 +104,19 @@
     </pattern>
   </defs>
   <path fill="url(#water)" d="M0 0h1400v500H0z"/>
-  <rect width="2800" height="500" fill="url(#rays)" data-speed="7"/>
+  <g mask="url(#refracted-light)">
+    <g data-speed="7">
+      <rect width="2800" height="500" fill="url(#rays)"/>
+      <rect id="fine-rays" y="-24" width="2800" height="548" fill="url(#ray-edges)"/>
+    </g>
+  </g>
   <g id="terrain">
     <g data-plane="0"><rect x="-700" y="180" width="4200" height="320" fill="url(#far-ridge)" opacity=".65" data-speed="2.4"/></g>
     <g data-plane=".35"><rect x="-700" y="180" width="4200" height="320" fill="url(#near-ridge)" data-speed="6"/></g>
     <g data-plane=".7"><rect x="-700" y="180" width="4200" height="320" fill="url(#shelf)" data-speed="13"/></g>
     <g data-plane="1"><rect x="-700" y="180" width="4200" height="520" fill="url(#foreground)" data-speed="23"/></g>
   </g>
+  <rect id="distance-haze" width="1400" height="500" fill="url(#ambient-depth)" pointer-events="none"/>
   <g id="camera">
     <g id="whale" fill="#183447">
       <g id="bubbles" transform="translate(53 -34)" aria-hidden="true">
@@ -126,6 +144,9 @@
 <script>
   'use strict';
   const camera = document.querySelector('#camera');
+  const distanceHaze = document.querySelector('#distance-haze');
+  const fineRays = document.querySelector('#fine-rays');
+  const depthPalette = Array.from(document.querySelectorAll('[data-deep-color]'), stop => ({ stop, near: stop.getAttribute('stop-color'), far: stop.dataset.deepColor }));
   const terrainPlanes = Array.from(document.querySelectorAll('[data-plane]'), node => ({ node, proximity: Number(node.dataset.plane) }));
   const zoomOut = document.querySelector('#zoom-out');
   const zoomIn = document.querySelector('#zoom-in');
@@ -137,9 +158,16 @@
     zoomTenths = Math.max(minTenths, Math.min(tenths, maxTenths));
     const scale = zoomTenths / 10;
     camera.style.transform = `scale(${scale})`;
+    const distance = Math.max(0, (originalTenths - zoomTenths) / (originalTenths - minTenths));
+    const blend = distance * distance * (3 - 2 * distance);
+    distanceHaze.style.opacity = .55 * blend;
+    for (const { stop, near, far } of depthPalette) {
+      stop.style.stopColor = `color-mix(in srgb, ${near}, ${far} ${blend * 100}%)`;
+    }
+    fineRays.style.filter = blend ? `blur(${5 * blend}px)` : 'none';
     for (const { node, proximity } of terrainPlanes) {
-      const planeScale = .84 + .2 * proximity + (scale - 1) * (.1 + .32 * proximity);
-      const offset = 22 + 16 * proximity + 8 * Math.abs(scale - 1);
+      const planeScale = .84 + .2 * proximity + (scale - 1) * (.06 + .17 * proximity);
+      const offset = 22 + 16 * proximity + 4.5 * Math.abs(scale - 1);
       node.style.transform = `translateY(${offset}px) scale(${planeScale})`;
     }
     zoomReset.textContent = `${scale}×`;
@@ -174,6 +202,30 @@
   });
   const layers = Array.from(document.querySelectorAll('[data-speed]'), node => ({ node, speed: Number(node.dataset.speed) }));
   const sceneWidth = 1400;
+  const surfaceFocus = document.querySelector('#surface-focus');
+  const sampleCount = 48;
+  const lightSamples = Array.from({ length: sampleCount + 1 }, (_, index) => {
+    const stop = document.createElementNS(scene.namespaceURI, 'stop');
+    stop.setAttribute('stop-color', 'white');
+    surfaceFocus.append(stop);
+    return { stop, position: index / sampleCount };
+  });
+  let lastLightFrame = -1;
+  function lightWater(time) {
+    const frame = Math.floor(time * 20);
+    if (frame === lastLightFrame) return;
+    lastLightFrame = frame;
+    const swell = time * .8, ripple = time * 1.18;
+    const tau = Math.PI * 2;
+    const origin = .022 * Math.sin(-swell) + .006 * Math.sin(ripple);
+    for (const { stop, position } of lightSamples) {
+      const longWave = 3 * tau * position - swell, shortWave = 5 * tau * position + ripple;
+      const offset = position + .022 * Math.sin(longWave) + .006 * Math.sin(shortWave) - origin;
+      const spacing = 1 + .022 * 3 * tau * Math.cos(longWave) + .006 * 5 * tau * Math.cos(shortWave);
+      stop.setAttribute('offset', Math.max(0, Math.min(1, offset)));
+      stop.setAttribute('stop-opacity', Math.min(1, .76 / spacing));
+    }
+  }
   function beat(phase) {
     const stroke = ((phase + 1) % 1) / .52;
     return stroke < 1 ? Math.sin(2 * Math.PI * stroke) * Math.sin(Math.PI * stroke) ** 2 : 0;
@@ -241,6 +293,7 @@
   }
   function render(time) {
     pose(time);
+    lightWater(time);
     const passage = Math.floor(time / 26), local = time % 26;
     burst(bubbles, local - 2 - (passage % 3) * 1.4, .56, 3.8, drawBubble);
     burst(echoes, local - 11 - (passage % 4) * 1.2, .72, 3.2, drawEcho);
