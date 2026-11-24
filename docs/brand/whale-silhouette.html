@@ -8,21 +8,30 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; background: #101f2c; }
-    svg { display: block; width: min(100%, 280vh); width: min(100%, 280svh); height: auto; overflow: hidden; }
+    body > svg { display: block; width: min(100%, 280vh); width: min(100%, 280svh); height: auto; overflow: hidden; }
+    #camera, [data-plane] { transition: transform .22s ease-out; }
+    #camera { transform-origin: 700px 250px; }
+    [data-plane] { transform-origin: 700px 400px; }
     #belly { opacity: 0; transition: opacity .3s ease; }
     #whale.show-belly #belly { opacity: 1; }
-    #belly-toggle {
+    .controls {
       position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom));
-      display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 6px;
-      background: #101f2ce6; color: #c2d4d8; font: 14px/1.3 system-ui, sans-serif; cursor: pointer;
+      display: flex; align-items: center; background: #101f2ce6; border-radius: 6px;
+      color: #c2d4d8; font: 14px/1.3 system-ui, sans-serif;
     }
-    #belly-toggle:focus-visible { outline: 2px solid #d8e6e6; outline-offset: 3px; }
+    .controls button { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+    .controls button:enabled:hover { background: #c2d4d810; }
+    .controls button:focus-visible { outline: 2px solid #d8e6e6; outline-offset: -2px; }
+    .controls button:disabled { opacity: .35; cursor: default; }
+    #zoom-reset { width: 48px; font-variant-numeric: tabular-nums; }
+    #belly-toggle { display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+    .separator { width: 1px; height: 18px; background: #869da655; }
     .track { width: 28px; height: 16px; padding: 2px; border: 1px solid #869da6; border-radius: 10px; }
     .track::after { content: ''; display: block; width: 10px; height: 10px; border-radius: 50%; background: currentColor; transition: transform .2s ease; }
     #belly-toggle[aria-checked="true"] .track { background: #adc1c6; color: #183447; }
     #belly-toggle[aria-checked="true"] .track::after { transform: translateX(12px); }
     @media (prefers-reduced-motion: reduce) {
-      #belly, .track::after { transition: none; }
+      #camera, [data-plane], #belly, .track::after { transition: none; }
       #bubbles, #sonar { display: none; }
     }
   </style>
@@ -38,7 +47,7 @@
       <stop stop-color="#b6d5db" stop-opacity="0"/><stop offset=".5" stop-color="#c3dfdf"/><stop offset="1" stop-color="#b6d5db" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="water" x2=".17" y2="1">
-      <stop stop-color="#84a2ae"/><stop offset=".34" stop-color="#52798d"/><stop offset=".72" stop-color="#37566f"/><stop offset="1" stop-color="#243c53"/>
+      <stop stop-color="#84a2ae"/><stop offset=".34" stop-color="#52798d"/><stop offset=".8" stop-color="#34566c"/><stop offset="1" stop-color="#243c53"/>
     </linearGradient>
     <linearGradient id="shaft" x2="0" y2="1">
       <stop stop-color="#edf5e5" stop-opacity=".42"/><stop offset=".55" stop-color="#b9d6db" stop-opacity=".15"/><stop offset="1" stop-color="#b9d6db" stop-opacity="0"/>
@@ -74,36 +83,87 @@
       </g>
       <path fill="#728a95" opacity=".43" d="M70 379q10-30 21-30l9 10-11-4z M1154 378l12-13 12-4 6 4-10-1z"/>
     </pattern>
-    <pattern id="foreground" width="1400" height="500" patternUnits="userSpaceOnUse">
-      <path fill="#27455c" d="M0 414C144 414 194 400 320 405S586 441 741 437 939 417 1086 409 1301 414 1400 414V500H0Z"/>
-      <path fill="#223e54" d="M0 449C108 449 166 430 297 434S589 469 744 463 1007 428 1138 434 1311 449 1400 449V500H0Z"/>
+    <pattern id="foreground" width="1400" height="700" patternUnits="userSpaceOnUse">
+      <path fill="#27455c" d="M0 414C144 414 194 400 320 405S586 441 741 437 939 417 1086 409 1301 414 1400 414V700H0Z"/>
+      <path fill="#436477" d="M90 424Q156 413 215 399L306 395 355 399 293 408 218 416Z M908 432Q983 423 1041 410L1085 407 1148 411 1091 419 1012 426Z"/>
+      <path fill="#284457" d="M90 424L218 416 293 408 355 399 329 412 284 419 223 425 148 429Z M908 432L1012 426 1091 419 1148 411 1136 420 1094 429 976 437Z"/>
+      <path fill="#223e54" d="M0 449C108 449 166 430 297 434S589 469 744 463 1007 428 1138 434 1311 449 1400 449V700H0Z"/>
       <path fill="#1e394e" d="M275 441l23-5 8-7 13 1 11 9 18 3z M994 444l19-6 9-12 12-3 16 12 29 6z"/>
     </pattern>
   </defs>
   <path fill="url(#water)" d="M0 0h1400v500H0z"/>
   <rect width="2800" height="500" fill="url(#rays)" data-speed="7"/>
-  <rect width="2800" height="500" fill="url(#far-ridge)" data-speed="2.8"/>
-  <rect width="2800" height="500" fill="url(#near-ridge)" data-speed="6"/>
-  <rect width="2800" height="500" fill="url(#shelf)" data-speed="12"/>
-  <rect width="2800" height="500" fill="url(#foreground)" data-speed="20"/>
-  <g id="whale" fill="#183447">
-    <g id="bubbles" transform="translate(53 -34)" aria-hidden="true">
-      <use href="#air-bubble"/><use href="#air-bubble"/><use href="#air-bubble"/>
+  <g id="terrain">
+    <g data-plane="0"><rect x="-700" y="180" width="4200" height="320" fill="url(#far-ridge)" opacity=".65" data-speed="2.4"/></g>
+    <g data-plane=".35"><rect x="-700" y="180" width="4200" height="320" fill="url(#near-ridge)" data-speed="6"/></g>
+    <g data-plane=".7"><rect x="-700" y="180" width="4200" height="320" fill="url(#shelf)" data-speed="13"/></g>
+    <g data-plane="1"><rect x="-700" y="180" width="4200" height="520" fill="url(#foreground)" data-speed="23"/></g>
+  </g>
+  <g id="camera">
+    <g id="whale" fill="#183447">
+      <g id="bubbles" transform="translate(53 -34)" aria-hidden="true">
+        <use href="#air-bubble"/><use href="#air-bubble"/><use href="#air-bubble"/>
+      </g>
+      <g id="sonar" transform="translate(107 -6)" fill="none" stroke="url(#echo-ink)" stroke-width="1.6" aria-hidden="true">
+        <path/><path/>
+      </g>
+      <path d="M68 51C61 61 57 73 40 79 34 82 24 81 23 78 34 72 32 57 39 50Z"/>
+      <path id="silhouette"/>
+      <path id="belly" clip-path="url(#body-clip)" fill="#607d89" d="M119-5C102 13 79 31 49 39S-3 44-35 31Q-51 25-68 18V82H119Z"/>
+      <path id="flipper" d="M8 31C-1 35-10 49-23 57-32 62-43 63-49 62-48 70-29 76-12 71 5 67 15 54 21 44 23 37 19 31 8 31Z"/>
     </g>
-    <g id="sonar" transform="translate(107 -6)" fill="none" stroke="url(#echo-ink)" stroke-width="1.6" aria-hidden="true">
-      <path/><path/>
-    </g>
-    <path d="M68 51C61 61 57 73 40 79 34 82 24 81 23 78 34 72 32 57 39 50Z"/>
-    <path id="silhouette"/>
-    <path id="belly" clip-path="url(#body-clip)" fill="#607d89" d="M119-5C102 13 79 31 49 39S-3 44-35 31Q-51 25-68 18V82H119Z"/>
-    <path id="flipper" d="M8 31C-1 35-10 49-23 57-32 62-43 63-49 62-48 70-29 76-12 71 5 67 15 54 21 44 23 37 19 31 8 31Z"/>
   </g>
   <g id="plankton" fill="#e1ece1"></g>
   <path fill="url(#grain)" opacity=".044" pointer-events="none" d="M0 0h1400v500H0z"/>
 </svg>
-<button id="belly-toggle" type="button" role="switch" aria-checked="false" aria-controls="belly"><span class="track" aria-hidden="true"></span>鲸腹</button>
+<div class="controls" role="group" aria-label="画面控制">
+  <button id="zoom-out" type="button" aria-label="拉远镜头" title="拉远镜头"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M8 11h6"/></svg></button>
+  <button id="zoom-reset" type="button" title="回到原视角" aria-label="回到原视角，当前 1×">1×</button>
+  <button id="zoom-in" type="button" aria-label="拉近镜头" title="拉近镜头"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M8 11h6m-3-3v6"/></svg></button>
+  <span class="separator" aria-hidden="true"></span>
+  <button id="belly-toggle" type="button" role="switch" aria-checked="false" aria-controls="belly"><span class="track" aria-hidden="true"></span>鲸腹</button>
+</div>
 <script>
   'use strict';
+  const camera = document.querySelector('#camera');
+  const terrainPlanes = Array.from(document.querySelectorAll('[data-plane]'), node => ({ node, proximity: Number(node.dataset.plane) }));
+  const zoomOut = document.querySelector('#zoom-out');
+  const zoomIn = document.querySelector('#zoom-in');
+  const zoomReset = document.querySelector('#zoom-reset');
+  const minTenths = 1, maxTenths = 20, originalTenths = 10;
+  let zoomTenths = originalTenths;
+  let wheelRemainder = 0;
+  function setZoom(tenths) {
+    zoomTenths = Math.max(minTenths, Math.min(tenths, maxTenths));
+    const scale = zoomTenths / 10;
+    camera.style.transform = `scale(${scale})`;
+    for (const { node, proximity } of terrainPlanes) {
+      const planeScale = .84 + .2 * proximity + (scale - 1) * (.1 + .32 * proximity);
+      const offset = 22 + 16 * proximity + 8 * Math.abs(scale - 1);
+      node.style.transform = `translateY(${offset}px) scale(${planeScale})`;
+    }
+    zoomReset.textContent = `${scale}×`;
+    zoomReset.setAttribute('aria-label', `回到原视角，当前 ${scale}×`);
+    zoomOut.disabled = zoomTenths === minTenths;
+    zoomIn.disabled = zoomTenths === maxTenths;
+  }
+  const scene = camera.ownerSVGElement;
+  scene.addEventListener('wheel', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || !event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    event.preventDefault();
+    const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 24 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? scene.clientHeight : 1;
+    if (Math.sign(event.deltaY) !== Math.sign(wheelRemainder)) wheelRemainder = 0;
+    wheelRemainder += event.deltaY * unit;
+    const steps = Math.trunc(wheelRemainder / 72);
+    if (steps) {
+      wheelRemainder %= 72;
+      setZoom(zoomTenths - steps);
+    }
+  }, { passive: false });
+  zoomOut.addEventListener('click', () => { wheelRemainder = 0; setZoom(zoomTenths - 1); });
+  zoomIn.addEventListener('click', () => { wheelRemainder = 0; setZoom(zoomTenths + 1); });
+  zoomReset.addEventListener('click', () => { wheelRemainder = 0; setZoom(originalTenths); });
+  setZoom(originalTenths);
   const whale = document.querySelector('#whale');
   const silhouette = document.querySelector('#silhouette');
   const flipper = document.querySelector('#flipper');
