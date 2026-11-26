@@ -14,6 +14,10 @@
 - [独鲸品牌素材：动画、图标和页面元素](docs/brand/README.md)
 - [路线图](docs/roadmap.md)
 
+## 工作记录
+
+- [IME benchmark iteration-003（2026-11-27）](docs/benchmark-iteration-003.md)
+
 ## 文档原则
 
 - 记录已经做出的判断和仍然开放的问题。
