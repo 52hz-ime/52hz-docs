@@ -17,7 +17,9 @@
 
 ## 工作记录
 
-- [IME benchmark iteration-003（2026-11-27）](docs/benchmark-iteration-003.md)
+- [迭代记录](docs/iterations.md)：编号约定、每个迭代的题目和结论
+- [IME benchmark iteration-003（2026-11-27）](docs/benchmark-iteration-003.md)：iter-03 和 iter-04 的记录
+- [拼音转汉字的能力测评 iter-05（2026-11-27）](docs/iter-05-pinyin-conversion.md)
 
 ## 文档原则
 
