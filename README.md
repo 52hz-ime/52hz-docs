@@ -10,6 +10,7 @@
 - [产品定义](docs/product-definition.md)
 - [总体架构](docs/architecture.md)
 - [设备感知的噪声输入](docs/device-aware-decoding.md)
+- [解码算法](docs/decoding-algorithm.md)
 - [品牌方向](docs/brand.md)
 - [独鲸品牌素材：动画、图标和页面元素](docs/brand/README.md)
 - [路线图](docs/roadmap.md)
